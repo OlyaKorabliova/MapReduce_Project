@@ -9,7 +9,7 @@ using namespace std;
 
 map<string, int> counting_words_worker(const vector<string>& words){
     map<string, int> localm;
-    for (size_t  i = 0; i != words.size(); ++i) {
+    for (size_t i = 0; i != words.size(); ++i) {
             ++localm[words[i]];
     }
     return localm;

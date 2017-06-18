@@ -167,7 +167,13 @@ struct func_wrapper
             r += func_calculation(m, (*i).first, (*i).second) * itr1.get_pr() * itr1.get_pr();
             // cout << (*i).first << " " <<  (*i).second << " " << r << endl;
         }
-        d.push_back(r);
+        {
+            lock_guard<mutex> lg(myMutex);
+            d.push_back(r);
+        }
+        cv.notify_one();
+        cv.notify_all();
+        num += 1;
         return r;
     }
 

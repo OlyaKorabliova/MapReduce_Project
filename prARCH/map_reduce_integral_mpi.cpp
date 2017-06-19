@@ -204,20 +204,23 @@ template<class MF, class RF, class I, class N, class Dd>
 Dd func_tmpl(I beg, I fin, vector<Dd> vec, MF fn1, RF fn2, N num_of_threads) {
     cout << "~ " << beg << " " << fin << " " << vec[0] << " " << vec[1] << " " << num_of_threads << endl;
     Dd res;
+    int l = (int) num_of_threads;
     size_t delta = (fin - beg) / num_of_threads;
-    int l = (int)num_of_threads;
+    cout << "del:= " << delta << endl;
     thread myThreads[l];
     double result = 0;
-    double from_to[] = {beg, beg + delta, num_of_threads, num};
+    double from_to[] = {beg, fin, num_of_threads, num};
     if (rankk == 0) {
+        double from_to[] = {beg, beg + delta, num_of_threads, num};
+        result = fn1(from_to[0], from_to[1], vec, from_to[2], ref(from_to[3]));
+
         for (int j = 1; j < commsize; ++j) {
             MPI_Send(from_to, 4, MPI_DOUBLE, j, 0, MPI_COMM_WORLD);
-//            for (auto k : from_to) cout << j << " from_to: " << k << " " << endl;
-
+            cout << "from_to[0]= " << from_to[0] << endl;
+            cout << "from_to[1]= " << from_to[1] << endl;
             from_to[0] = from_to[1];
             from_to[1] += delta;
         }
-        result = fn1(from_to[0], from_to[1], vec, from_to[2], ref(from_to[3]));
 
         for (int i = 1; i < commsize; ++i) {
             double received;
@@ -252,12 +255,9 @@ int main(int argc, char *argv[]) {
     len = len1;
     commsize = commsize1;
 
-    vector<double> data = {0, 1, 0, 1, 5, 0.001};
-    double n = 0;
-    vector<double> v = {data[4], data[5]};
-    vector<double>::const_iterator fourth_el = data.begin() + 4;
-    vector<double>::const_iterator fifth_el = data.begin() + 5;
-//    vector<double> new_v(fourth_el, fifth_el);
+    vector<double> data = {0, 4, 5, 0.001};
+    double n = 2;       // num of threads
+    vector<double> v = {data[2], data[3]};
     cout << "Integral" << endl;
     for (auto i : data) cout << "\tdata: " << " " << i << endl;
     cout << func_tmpl(data[0], data[1], v, func_wrapper(n, num), thread_integration, n) << endl;
